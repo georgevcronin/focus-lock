@@ -7,6 +7,8 @@ workflows:
       app_store_connect: press-asc-key   # Codemagic > Personal account settings > Developer Portal key
     environment:
       xcode: latest
+      groups:
+        - focuslock
     scripts:
       - name: Generate Xcode project
         script: brew install xcodegen && xcodegen

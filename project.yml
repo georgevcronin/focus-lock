@@ -3,7 +3,7 @@ options:
   bundleIdPrefix: com.georgevcronin
   deploymentTarget: { iOS: "16.0" }
 settings:
-  base: { SWIFT_VERSION: "5.0" }
+  base: { SWIFT_VERSION: "5.0", MARKETING_VERSION: "1.0", CURRENT_PROJECT_VERSION: "1" }
 targets:
   FocusLock:
     type: application

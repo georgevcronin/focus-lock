@@ -17,7 +17,7 @@ struct Slot: Codable, Identifiable, Hashable {
 func loadSelection() -> FamilyActivitySelection {
     defaults.data(forKey: "sel").flatMap { try? JSONDecoder().decode(FamilyActivitySelection.self, from: $0) } ?? .init()
 }
-func loadSlots() -> [Slot] {
+func loadWindows() -> [Slot] {
     defaults.data(forKey: "win").flatMap { try? JSONDecoder().decode([Slot].self, from: $0) } ?? []
 }
 func save(_ sel: FamilyActivitySelection, _ wins: [Slot]) {
@@ -36,7 +36,7 @@ func lift() { store.clearAllSettings() }
 func isAllowed(at date: Date = .now) -> Bool {
     let c = Calendar.current.dateComponents([.weekday, .hour, .minute], from: date)
     let m = c.hour! * 60 + c.minute!
-    return loadSlots().contains { $0.weekday == c.weekday! && $0.start <= m && m < $0.end }
+    return loadWindows().contains { $0.weekday == c.weekday! && $0.start <= m && m < $0.end }
 }
 
 /// Settings are editable inside a window, or on first run before any window exists (else setup would be impossible).
@@ -46,7 +46,7 @@ func isOpen() -> Bool { loadWindows().isEmpty || isAllowed() }
 func apply() {
     let center = DeviceActivityCenter()
     center.stopMonitoring()
-    for w in loadSlots() {
+    for w in loadWindows() {
         let start = DateComponents(hour: w.start / 60, minute: w.start % 60, weekday: w.weekday)
         let end = DateComponents(hour: w.end / 60, minute: w.end % 60, weekday: w.weekday)
         // ponytail: iOS caps monitored activities (~20), so ~20 windows/week total; merge windows if more are needed

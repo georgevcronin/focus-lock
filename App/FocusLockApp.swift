@@ -13,7 +13,7 @@ struct ContentView: View {
     @State private var windows = loadWindows()
     @State private var picking = false
     @State private var error = ""
-    @State private var open = isOpen()
+    @State private var unlocked = isOpen()
     private let tick = Timer.publish(every: 20, on: .main, in: .common).autoconnect()
 
     var valid: Bool { windows.allSatisfy { $0.end > $0.start } && windows.count <= 20 }

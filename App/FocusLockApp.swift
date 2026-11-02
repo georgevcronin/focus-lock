@@ -21,7 +21,7 @@ struct ContentView: View {
     var body: some View {
         NavigationStack {
             Form {
-                if !open {
+                if !unlocked {
                     Section { Text("Locked. Settings can only be changed during an allowed window.").foregroundStyle(.orange) }
                 }
                 Section {
@@ -47,7 +47,7 @@ struct ContentView: View {
                 }
                 Section {
                     Button("Save & lock") {
-                        guard isOpen() else { open = false; return }
+                        guard isOpen() else { unlocked = false; return }
                         save(sel, windows)
                         apply()
                     }.disabled(!valid)
@@ -55,8 +55,8 @@ struct ContentView: View {
                     if !error.isEmpty { Text(error).foregroundStyle(.red) }
                 }
             }
-            .disabled(!open)
-            .onReceive(tick) { _ in open = isOpen() }
+            .disabled(!unlocked)
+            .onReceive(tick) { _ in unlocked = isOpen() }
             .navigationTitle("Focus Lock")
             .familyActivityPicker(isPresented: $picking, selection: $sel)
             .task {

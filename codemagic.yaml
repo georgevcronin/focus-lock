@@ -14,8 +14,8 @@ workflows:
         script: |
           keychain initialize
           # Monitor extension has its own bundle id, so it needs its own profile
-          app-store-connect fetch-signing-files com.georgevcronin.focuslock.monitor --type IOS_APP_DEVELOPMENT --create
-          app-store-connect fetch-signing-files com.georgevcronin.focuslock --type IOS_APP_DEVELOPMENT --create
+          app-store-connect fetch-signing-files com.georgevcronin.focuslock.monitor --type IOS_APP_DEVELOPMENT --create --certificate-key @env:CERTIFICATE_PRIVATE_KEY
+          app-store-connect fetch-signing-files com.georgevcronin.focuslock --type IOS_APP_DEVELOPMENT --create --certificate-key @env:CERTIFICATE_PRIVATE_KEY
           keychain add-certificates
           xcode-project use-profiles
       - name: Build ipa

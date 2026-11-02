@@ -1,0 +1,25 @@
+workflows:
+  ios-dev:
+    name: Focus Lock iOS (development)
+    max_build_duration: 30
+    instance_type: mac_mini_m2
+    integrations:
+      app_store_connect: codemagic   # name of your App Store Connect API key in Codemagic > Team integrations
+    environment:
+      xcode: latest
+    scripts:
+      - name: Generate Xcode project
+        script: brew install xcodegen && xcodegen
+      - name: Set up signing
+        script: |
+          keychain initialize
+          # Monitor extension has its own bundle id, so it needs its own profile
+          app-store-connect fetch-signing-files com.georgevcronin.focuslock.monitor --type IOS_APP_DEVELOPMENT --create
+          app-store-connect fetch-signing-files com.georgevcronin.focuslock --type IOS_APP_DEVELOPMENT --create
+          keychain add-certificates
+          xcode-project use-profiles
+      - name: Build ipa
+        script: |
+          xcode-project build-ipa --project FocusLock.xcodeproj --scheme FocusLock
+    artifacts:
+      - build/ios/ipa/*.ipa

@@ -1,0 +1,40 @@
+name: FocusLock
+options:
+  bundleIdPrefix: com.georgevcronin
+  deploymentTarget: { iOS: "16.0" }
+settings:
+  base: { SWIFT_VERSION: "5.0" }
+targets:
+  FocusLock:
+    type: application
+    platform: iOS
+    sources: [App, Shared]
+    settings:
+      base: { PRODUCT_BUNDLE_IDENTIFIER: com.georgevcronin.focuslock }
+    info:
+      path: App/Info.plist
+      properties: { UILaunchScreen: {} }
+    entitlements:
+      path: App/FocusLock.entitlements
+      properties:
+        com.apple.developer.family-controls: true
+        com.apple.security.application-groups: [group.com.georgevcronin.focuslock]
+    dependencies: [{ target: Monitor }]
+  Monitor:
+    type: app-extension
+    platform: iOS
+    sources: [Monitor, Shared]
+    settings:
+      base: { PRODUCT_BUNDLE_IDENTIFIER: com.georgevcronin.focuslock.monitor }
+    info:
+      path: Monitor/Info.plist
+      properties:
+        CFBundleDisplayName: Monitor
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.deviceactivity.monitor-extension
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).Monitor
+    entitlements:
+      path: Monitor/Monitor.entitlements
+      properties:
+        com.apple.developer.family-controls: true
+        com.apple.security.application-groups: [group.com.georgevcronin.focuslock]

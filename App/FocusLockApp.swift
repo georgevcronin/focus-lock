@@ -14,6 +14,7 @@ struct ContentView: View {
     @State private var picking = false
     @State private var error = ""
     @State private var unlocked = isOpen()
+    @State private var base = FamilyActivitySelection()
     private let tick = Timer.publish(every: 20, on: .main, in: .common).autoconnect()
 
     var valid: Bool { windows.allSatisfy { $0.end > $0.start } && windows.count <= 20 }
@@ -22,13 +23,14 @@ struct ContentView: View {
         NavigationStack {
             Form {
                 if !unlocked {
-                    Section { Text("Locked. Settings can only be changed during an allowed window.").foregroundStyle(.orange) }
+                    Section { Text("Locked. Windows can only be changed during an allowed window. You can still add apps to block.").foregroundStyle(.orange) }
                 }
                 Section {
-                    Button("Choose apps & sites to block") { picking = true }
+                    Button("Choose apps & sites to block") { base = sel; picking = true }
                     Text("\(sel.applicationTokens.count) apps · \(sel.categoryTokens.count) categories · \(sel.webDomainTokens.count) sites")
                         .foregroundStyle(.secondary)
                 }
+                Group {
                 ForEach(1...7, id: \.self) { day in
                     Section(Calendar.current.weekdaySymbols[day - 1]) {
                         ForEach($windows) { $w in
@@ -54,11 +56,23 @@ struct ContentView: View {
                     if !valid { Text("Each window must end after it starts; max 20 windows.").foregroundStyle(.red) }
                     if !error.isEmpty { Text(error).foregroundStyle(.red) }
                 }
+                }.disabled(!unlocked)
             }
-            .disabled(!unlocked)
             .onReceive(tick) { _ in unlocked = isOpen() }
             .navigationTitle("Focus Lock")
             .familyActivityPicker(isPresented: $picking, selection: $sel)
+            // While locked the picker may only add: merge back whatever was already blocked, save on dismiss.
+            .onChange(of: sel) { new in
+                guard !unlocked else { return }
+                var m = new
+                m.applicationTokens.formUnion(base.applicationTokens)
+                m.categoryTokens.formUnion(base.categoryTokens)
+                m.webDomainTokens.formUnion(base.webDomainTokens)
+                if m != new { sel = m }
+            }
+            .onChange(of: picking) { now in
+                if !now && !unlocked { save(sel, windows); shield() }
+            }
             .task {
                 do { try await AuthorizationCenter.shared.requestAuthorization(for: .individual) }
                 catch { self.error = "Screen Time access denied: \(error.localizedDescription)" }
